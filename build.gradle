@@ -1,0 +1,53 @@
+plugins {
+    id "net.fabricmc.fabric-loom" version "1.17-SNAPSHOT"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+repositories {
+    maven { url "https://maven.fabricmc.net/" }
+    maven { url "https://maven.terraformersmc.com/" }
+    mavenCentral()
+}
+
+loom {
+    splitEnvironmentSourceSets()
+    mods {
+        "betterf3c" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    compileOnly "com.terraformersmc:modmenu:18.0.0"
+}
+
+processResources {
+    def version = project.version
+    inputs.property "version", version
+    filesMatching("fabric.mod.json") {
+        expand "version": version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 25
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.name}" }
+    }
+}

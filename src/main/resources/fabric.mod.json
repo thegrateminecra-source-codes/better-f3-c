@@ -1,0 +1,24 @@
+{
+    "schemaVersion": 1,
+    "id": "betterf3c",
+    "version": "${version}",
+    "name": "Better F3 C",
+    "description": "Replaces F3+C debug copy with configurable coordinate output",
+    "authors": ["thegrateminecra"],
+    "contact": {},
+    "license": "MIT",
+    "icon": "assets/betterf3c/icon.png",
+    "environment": "client",
+    "entrypoints": {
+        "client": ["com.thegrateminecra.betterf3c.BetterF3C"],
+        "modmenu": ["com.thegrateminecra.betterf3c.config.ModMenuIntegration"]
+    },
+    "mixins": [
+        "betterf3c.client.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=0.19.3",
+        "minecraft": ">=26.2",
+        "fabric-api": "*"
+    }
+}
