@@ -31,9 +31,9 @@ You can also edit `config/betterf3c.json` directly without Mod Menu installed.
 
 ## Compatibility
 
-- **Minecraft**: 26.2+
-- **Loader**: Fabric 0.19.3+
-- **Mod Menu**: 18.0.0+ (optional)
+- **Minecraft**: 1.21 - 26.2
+- **Loader**:
+- **Mod Menu**:
 
 ## License
 
