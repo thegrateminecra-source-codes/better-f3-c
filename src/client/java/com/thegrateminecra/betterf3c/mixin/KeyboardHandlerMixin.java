@@ -25,8 +25,9 @@ public class KeyboardHandlerMixin {
     private void onDebugKey(KeyEvent keyEvent, CallbackInfoReturnable<Boolean> cir) {
         if (minecraft.player == null) return;
 
-        boolean matches = minecraft.options.keyDebugCopyRecreateCommand.matches(keyEvent)
-                       || minecraft.options.keyDebugCopyLocation.matches(keyEvent);
+        // 1.21.10 has no debug copy keybindings, the keys are hardcoded
+        int key = keyEvent.key();
+        boolean matches = key == 67 || key == 73;
 
         if (!matches) return;
         if (minecraft.player.isReducedDebugInfo()) return;
@@ -48,7 +49,7 @@ public class KeyboardHandlerMixin {
             case ADVANCED -> String.format("%.0f %.0f %.0f %.2f %.2f", player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             case TP_COMMAND -> String.format("/tp @s %.0f %.0f %.0f", player.getX(), player.getY(), player.getZ());
             case ULTIMATE -> {
-                String dim = player.level().dimension().identifier().toString();
+                String dim = player.level().dimension().location().toString();
                 yield String.format("/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f", dim, player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             }
         };
