@@ -4,7 +4,6 @@ import com.thegrateminecra.betterf3c.config.BetterF3CConfig;
 import com.thegrateminecra.betterf3c.config.CopyMode;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
@@ -22,14 +21,11 @@ public class KeyboardHandlerMixin {
     @Shadow private long debugCrashKeyReportedCount;
 
     @Inject(method = "handleDebugKeys", at = @At("HEAD"), cancellable = true)
-    private void onDebugKey(KeyEvent keyEvent, CallbackInfoReturnable<Boolean> cir) {
+    private void onDebugKey(int key, CallbackInfoReturnable<Boolean> cir) {
         if (minecraft.player == null) return;
 
-        // 1.21.10 has no debug copy keybindings, the keys are hardcoded
-        int key = keyEvent.key();
-        boolean matches = key == 67 || key == 73;
-
-        if (!matches) return;
+        // copy keys are hardcoded in the debug key switch
+        if (key != 67 && key != 73) return;
         if (minecraft.player.isReducedDebugInfo()) return;
 
         copyCoords();
