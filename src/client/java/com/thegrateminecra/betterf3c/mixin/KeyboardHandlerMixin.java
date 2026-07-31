@@ -4,6 +4,7 @@ import com.thegrateminecra.betterf3c.config.BetterF3CConfig;
 import com.thegrateminecra.betterf3c.config.CopyMode;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
@@ -21,11 +22,13 @@ public class KeyboardHandlerMixin {
     @Shadow private long debugCrashKeyReportedCount;
 
     @Inject(method = "handleDebugKeys", at = @At("HEAD"), cancellable = true)
-    private void onDebugKey(int key, CallbackInfoReturnable<Boolean> cir) {
+    private void onDebugKey(KeyEvent keyEvent, CallbackInfoReturnable<Boolean> cir) {
         if (minecraft.player == null) return;
 
-        // copy keys are hardcoded in the debug key switch
-        if (key != 67 && key != 73) return;
+        boolean matches = minecraft.options.keyDebugCopyRecreateCommand.matches(keyEvent)
+                       || minecraft.options.keyDebugCopyLocation.matches(keyEvent);
+
+        if (!matches) return;
         if (minecraft.player.isReducedDebugInfo()) return;
 
         copyCoords();
@@ -45,11 +48,11 @@ public class KeyboardHandlerMixin {
             case ADVANCED -> String.format("%.0f %.0f %.0f %.2f %.2f", player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             case TP_COMMAND -> String.format("/tp @s %.0f %.0f %.0f", player.getX(), player.getY(), player.getZ());
             case ULTIMATE -> {
-                String dim = player.level().dimension().location().toString();
+                String dim = player.level().dimension().identifier().toString();
                 yield String.format("/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f", dim, player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             }
         };
         minecraft.keyboardHandler.setClipboard(coords);
-        player.displayClientMessage(Component.literal("Copied: " + coords), true);
+        player.sendOverlayMessage(Component.literal("Copied: " + coords));
     }
 }
