@@ -21,7 +21,7 @@ You can also edit `config/betterf3c.json` directly without Mod Menu installed.
 
 ## Installation
 
-1. Install [Fabric Loader](https://fabricmc.net/) for Minecraft 1.21.5
+1. Install [Fabric Loader](https://fabricmc.net/) for Minecraft 1.21.4
 2. Install [Fabric API](https://modrinth.com/mod/fabric-api)
 3. Drop the JAR into your `mods` folder
 
@@ -31,9 +31,9 @@ You can also edit `config/betterf3c.json` directly without Mod Menu installed.
 
 ## Compatibility
 
-- **Minecraft**: 1.21.5
+- **Minecraft**: 1.21.4
 - **Loader**: Fabric 0.19.3+
-- **Mod Menu**: 14.0.0+ (optional)
+- **Mod Menu**: 13.0.0+ (optional)
 
 ## License
 
