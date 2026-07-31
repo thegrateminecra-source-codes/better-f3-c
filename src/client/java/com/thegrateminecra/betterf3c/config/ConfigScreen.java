@@ -1,6 +1,6 @@
 package com.thegrateminecra.betterf3c.config;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -37,7 +37,7 @@ public class ConfigScreen extends Screen {
 
         Button doneButton = Button.builder(
                 CommonComponents.GUI_DONE,
-                btn -> minecraft.setScreenAndShow(parent)
+                btn -> minecraft.setScreen(parent)
         ).bounds(width / 2 - 100, height / 2 + 20, 200, 20).build();
 
         addRenderableWidget(modeButton);
@@ -45,10 +45,10 @@ public class ConfigScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        super.extractRenderState(graphics, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        super.render(graphics, mouseX, mouseY, delta);
 
-        graphics.centeredText(getFont(), TITLE.getString(), width / 2, height / 2 - 60, 0xFFFFFF);
+        graphics.drawCenteredString(font, TITLE, width / 2, height / 2 - 60, 0xFFFFFF);
 
         Component desc = switch (config.getCopyMode()) {
             case BASIC -> DESC_BASIC;
@@ -56,12 +56,12 @@ public class ConfigScreen extends Screen {
             case TP_COMMAND -> DESC_TP;
             case ULTIMATE -> DESC_ULTIMATE;
         };
-        graphics.centeredText(getFont(), desc.getString(), width / 2, height / 2 + 5, 0x808080);
+        graphics.drawCenteredString(font, desc, width / 2, height / 2 + 5, 0x808080);
     }
 
     @Override
     public void onClose() {
-        minecraft.setScreenAndShow(parent);
+        minecraft.setScreen(parent);
     }
 
     private static String getModeLabel(CopyMode mode) {

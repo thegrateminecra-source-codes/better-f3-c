@@ -53,6 +53,6 @@ public class KeyboardHandlerMixin {
             }
         };
         minecraft.keyboardHandler.setClipboard(coords);
-        player.sendOverlayMessage(Component.literal("Copied: " + coords));
+        player.displayClientMessage(Component.literal("Copied: " + coords), true);
     }
 }
