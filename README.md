@@ -21,7 +21,7 @@ You can also edit `config/betterf3c.json` directly without Mod Menu installed.
 
 ## Installation
 
-1. Install [Fabric Loader](https://fabricmc.net/) for Minecraft 26.2
+1. Install [Fabric Loader](https://fabricmc.net/) for a supported version
 2. Install [Fabric API](https://modrinth.com/mod/fabric-api)
 3. Drop the JAR into your `mods` folder
 
