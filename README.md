@@ -31,7 +31,7 @@ You can also edit `config/betterf3c.json` directly without Mod Menu installed.
 
 ## Compatibility
 
-- **Minecraft**: 1.21 - 26.2
+- **Minecraft**: 1.21 - 26.3
 - **Loader**:
 - **Mod Menu**:
 
