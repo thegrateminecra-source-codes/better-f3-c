@@ -1,6 +1,5 @@
 package com.thegrateminecra.betterf3c.config;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -8,10 +7,6 @@ import net.minecraft.network.chat.Component;
 
 public class ConfigScreen extends Screen {
     private static final Component TITLE = Component.literal("Better F3 C Config");
-    private static final Component DESC_BASIC = Component.literal("123 64 456");
-    private static final Component DESC_ADVANCED = Component.literal("123 64 456 -90.00 0.00");
-    private static final Component DESC_TP = Component.literal("/tp @s 123 64 456");
-    private static final Component DESC_ULTIMATE = Component.literal("/execute in minecraft:overworld run tp @s 123.00 64.00 456.00 -90.00 0.00");
 
     private final Screen parent;
     private BetterF3CConfig config;
@@ -37,7 +32,13 @@ public class ConfigScreen extends Screen {
 
         Button doneButton = Button.builder(
                 CommonComponents.GUI_DONE,
-                btn -> minecraft.setScreenAndShow(parent)
+                btn -> {
+                    //? if >=1.21.11 {
+                    minecraft.setScreenAndShow(parent);
+                    //?} else {
+                    /*minecraft.setScreen(parent);
+                    *///?}
+                }
         ).bounds(width / 2 - 100, height / 2 + 20, 200, 20).build();
 
         addRenderableWidget(modeButton);
@@ -45,23 +46,12 @@ public class ConfigScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        super.extractRenderState(graphics, mouseX, mouseY, delta);
-
-        graphics.centeredText(getFont(), TITLE.getString(), width / 2, height / 2 - 60, 0xFFFFFF);
-
-        Component desc = switch (config.getCopyMode()) {
-            case BASIC -> DESC_BASIC;
-            case ADVANCED -> DESC_ADVANCED;
-            case TP_COMMAND -> DESC_TP;
-            case ULTIMATE -> DESC_ULTIMATE;
-        };
-        graphics.centeredText(getFont(), desc.getString(), width / 2, height / 2 + 5, 0x808080);
-    }
-
-    @Override
     public void onClose() {
+        //? if >=1.21.11 {
         minecraft.setScreenAndShow(parent);
+        //?} else {
+        /*minecraft.setScreen(parent);
+        *///?}
     }
 
     private static String getModeLabel(CopyMode mode) {

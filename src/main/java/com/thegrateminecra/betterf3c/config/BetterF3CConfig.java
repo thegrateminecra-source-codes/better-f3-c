@@ -5,15 +5,25 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.logging.LogUtils;
-import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+//? if fabric {
+import net.fabricmc.loader.api.FabricLoader;
+//?} else {
+/*import net.minecraftforge.fml.loading.FMLPaths;
+*///?}
+
 public class BetterF3CConfig {
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    //? if fabric {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("betterf3c.json");
+    //?} else {
+    /*private static final Path CONFIG_PATH = FMLPaths.CONFIGDIR.get().resolve("betterf3c.json");
+    *///?}
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static BetterF3CConfig instance;
 

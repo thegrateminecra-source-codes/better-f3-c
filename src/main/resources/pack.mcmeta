@@ -1,0 +1,6 @@
+{
+    "pack": {
+        "description": "Better F3 C resources",
+        ${packBody}
+    }
+}

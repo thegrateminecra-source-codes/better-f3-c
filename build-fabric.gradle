@@ -1,0 +1,114 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            name = "Fabric"
+            url = uri("https://maven.fabricmc.net/")
+        }
+        maven {
+            name = "KikuGie Releases"
+            url = uri("https://maven.kikugie.dev/releases")
+        }
+        maven {
+            name = "KikuGie Snapshots"
+            url = uri("https://maven.kikugie.dev/snapshots")
+        }
+    }
+    dependencies {
+        // back-compat adds these too, but own copies avoid relying on that
+        classpath "net.fabricmc.fabric-loom:net.fabricmc.fabric-loom.gradle.plugin:1.18-SNAPSHOT"
+        classpath "net.fabricmc.fabric-loom-remap:net.fabricmc.fabric-loom-remap.gradle.plugin:1.18-SNAPSHOT"
+    }
+}
+
+apply plugin: "dev.kikugie.loom-back-compat"
+
+def isUnobf = stonecutter.eval(sc.current.version, ">=26.1")
+int javaLevel = isUnobf ? 25 : 21
+
+version = sc.current.version
+base {
+    archivesName = "betterf3c"
+}
+
+// fabric loader's tilde is coarse on patch-heavy series like 1.21, spell the ranges out
+def mcRanges = [
+    "1.21.1" : ">=1.21.1 <1.21.2",
+    "1.21.2" : ">=1.21.2 <1.21.3",
+    "1.21.3" : ">=1.21.3 <1.21.4",
+    "1.21.4" : ">=1.21.4 <1.21.5",
+    "1.21.5" : ">=1.21.5 <1.21.6",
+    "1.21.6" : ">=1.21.6 <1.21.7",
+    "1.21.7" : ">=1.21.7 <1.21.8",
+    "1.21.8" : ">=1.21.8 <1.21.9",
+    "1.21.9" : ">=1.21.9 <1.21.10",
+    "1.21.10": ">=1.21.10 <1.21.11",
+    "1.21.11": ">=1.21.11 <26.1",
+    "26.1"   : ">=26.1 <26.1.1",
+    "26.1.1" : ">=26.1.1 <26.1.2",
+    "26.1.2" : ">=26.1.2 <26.2",
+    "26.2"   : ">=26.2 <26.3",
+]
+def minecraftCompat = mcRanges[sc.current.version] ?: "~${sc.current.version}"
+
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = uri("https://api.modrinth.com/maven")
+            }
+        }
+        filter { includeGroup("maven.modrinth") }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${sc.current.version}"
+    loomx.applyMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.property('deps.fabric_loader')}"
+    modCompileOnly "maven.modrinth:modmenu:${project.property('deps.modmenu')}"
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(javaLevel)
+    targetCompatibility = JavaVersion.toVersion(javaLevel)
+    toolchain {
+        languageVersion = org.gradle.jvm.toolchain.JavaLanguageVersion.of(javaLevel)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = javaLevel
+}
+
+processResources {
+    def props = [
+        version    : sc.current.version.toString(),
+        minecraft  : minecraftCompat.toString(),
+        java       : ">=${javaLevel}".toString(),
+        loader     : (project.property('deps.fabric_loader') as String),
+        compatLevel: "JAVA_${javaLevel}".toString(),
+    ]
+    inputs.property("version", props.version)
+    inputs.property("minecraft", props.minecraft)
+    inputs.property("java", props.java)
+    inputs.property("loader", props.loader)
+    inputs.property("compatLevel", props.compatLevel)
+
+    filesMatching("fabric.mod.json") {
+        expand(props)
+    }
+    filesMatching("*.mixins.json") {
+        expand(compatLevel: props.compatLevel)
+    }
+
+    // forge-only files stay out of fabric jars
+    exclude("META-INF/mods.toml")
+    exclude("pack.mcmeta")
+}
+
+jar {
+    from(rootProject.file("LICENSE"))
+}

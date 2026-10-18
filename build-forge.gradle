@@ -1,0 +1,138 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '7.0.34'
+}
+
+def isUnobf = stonecutter.eval(sc.current.version, ">=26.1")
+int javaLevel = isUnobf ? 25 : 21
+
+version = sc.current.version
+base {
+    archivesName = "betterf3c-forge"
+}
+
+def minecraftCompat = "[${sc.current.version},)"
+
+// forge versions per drop, bump when new mc comes out
+def forgeVersions = [
+    '1.21.1' : '52.1.20',
+    '1.21.3' : '53.1.16',
+    '1.21.4' : '54.1.22',
+    '1.21.5' : '55.1.18',
+    '1.21.6' : '56.0.9',
+    '1.21.7' : '57.0.3',
+    '1.21.8' : '58.1.26',
+    '1.21.9' : '59.0.5',
+    '1.21.10': '60.1.18',
+    '1.21.11': '61.2.4',
+    '26.1.1' : '63.0.2',
+    '26.1.2' : '64.1.5',
+    '26.2'   : '65.1.5',
+    '26.3'   : '66.0.13',
+]
+def forgeVersion = forgeVersions[sc.current.version as String]
+def fmlMajor = forgeVersion.tokenize('.')[0]
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${sc.current.version}-${forgeVersion}")
+    // no mixin refmap here - lexforge runs real names at runtime now
+}
+
+// newer jopt-simple builds break modlauncher, keep 5.0.4
+configurations.configureEach {
+    resolutionStrategy {
+        force 'net.sf.jopt-simple:jopt-simple:5.0.4'
+    }
+}
+
+minecraft {
+    runs {
+        configureEach {
+            workingDir.convention rootProject.layout.projectDirectory.dir("run")
+        }
+        register("client")
+        register("server")
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(javaLevel)
+    targetCompatibility = JavaVersion.toVersion(javaLevel)
+    toolchain {
+        languageVersion = org.gradle.jvm.toolchain.JavaLanguageVersion.of(javaLevel)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = javaLevel
+}
+
+// pack formats per version, pre-1.21.9 uses the old pack_format style
+def packFormats = [
+    '1.21.1' : [34, null],
+    '1.21.3' : [42, null],
+    '1.21.4' : [46, null],
+    '1.21.5' : [55, null],
+    '1.21.6' : [63, null],
+    '1.21.7' : [64, null],
+    '1.21.8' : [64, null],
+    '1.21.9' : [69, 0],
+    '1.21.10': [69, 0],
+    '1.21.11': [75, 0],
+    '26.1.1' : [84, 0],
+    '26.1.2' : [84, 0],
+    '26.2'   : [88, 0],
+    '26.3'   : [97, 1],
+]
+def packFormat = packFormats[sc.current.version as String]
+// the pack.mcmeta body gets generated because pre-1.21.9 wants the old fields
+def packBody = packFormat[1] == null
+        ? '"pack_format": ' + packFormat[0]
+        : '"min_format": [' + packFormat[0] + ', ' + packFormat[1] + '], "max_format": ' + packFormat[0]
+
+processResources {
+    def props = [
+        version    : sc.current.version.toString(),
+        minecraft  : minecraftCompat.toString(),
+        fml        : fmlMajor.toString(),
+        packBody   : packBody,
+        // mixin 0.8.7 can't handle JAVA_25, top it out at JAVA_21
+        compatLevel: "JAVA_21",
+    ]
+    inputs.property("version", props.version)
+    inputs.property("minecraft", props.minecraft)
+    inputs.property("fml", props.fml)
+    inputs.property("packBody", props.packBody)
+    inputs.property("compatLevel", props.compatLevel)
+
+    filesMatching("META-INF/mods.toml") {
+        expand(props)
+    }
+    filesMatching("pack.mcmeta") {
+        expand(packBody: props.packBody)
+    }
+    filesMatching("*.mixins.json") {
+        expand(compatLevel: props.compatLevel)
+    }
+
+    // fabric-only files stay out of forge jars
+    exclude("fabric.mod.json")
+}
+
+tasks.named('jar', Jar) {
+    manifest {
+        // mixin reads its config names from the manifest
+        attributes['MixinConfigs'] = "betterf3c.client.mixins.json"
+    }
+    // logo at the root so the forge mods list can show it
+    from(rootProject.file("src/main/resources/assets/betterf3c/icon.png")) {
+        rename { "logo.png" }
+    }
+    from(rootProject.file("LICENSE"))
+}

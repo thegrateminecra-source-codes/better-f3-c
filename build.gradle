@@ -1,53 +1,23 @@
-plugins {
-    id "net.fabricmc.fabric-loom" version "1.17-SNAPSHOT"
-}
-
-version = project.mod_version
-group = project.maven_group
-
-repositories {
-    maven { url "https://maven.fabricmc.net/" }
-    maven { url "https://maven.terraformersmc.com/" }
-    mavenCentral()
-}
-
-loom {
-    splitEnvironmentSourceSets()
-    mods {
-        "betterf3c" {
-            sourceSet sourceSets.main
-            sourceSet sourceSets.client
+// repos for the loom deps stonecutter injects into the version nodes
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            name = "Fabric"
+            url = uri("https://maven.fabricmc.net/")
         }
-    }
-}
-
-dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    compileOnly "com.terraformersmc:modmenu:18.0.0"
-}
-
-processResources {
-    def version = project.version
-    inputs.property "version", version
-    filesMatching("fabric.mod.json") {
-        expand "version": version
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    it.options.release = 25
-}
-
-java {
-    withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.name}" }
+        maven {
+            name = "Forge"
+            url = uri("https://maven.minecraftforge.net/")
+        }
+        maven {
+            name = "KikuGie Releases"
+            url = uri("https://maven.kikugie.dev/releases")
+        }
+        maven {
+            name = "KikuGie Snapshots"
+            url = uri("https://maven.kikugie.dev/snapshots")
+        }
     }
 }

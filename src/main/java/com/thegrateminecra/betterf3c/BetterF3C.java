@@ -1,5 +1,6 @@
 package com.thegrateminecra.betterf3c;
 
+//? if fabric {
 import com.thegrateminecra.betterf3c.config.BetterF3CConfig;
 import com.mojang.logging.LogUtils;
 import net.fabricmc.api.ClientModInitializer;
@@ -14,3 +15,4 @@ public class BetterF3C implements ClientModInitializer {
         LOGGER.info("Better F3 C initialized");
     }
 }
+//?}

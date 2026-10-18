@@ -4,7 +4,6 @@ import com.thegrateminecra.betterf3c.config.BetterF3CConfig;
 import com.thegrateminecra.betterf3c.config.CopyMode;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
@@ -14,6 +13,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+//? if >=1.21.9 {
+import net.minecraft.client.input.KeyEvent;
+//?}
+
 @Mixin(KeyboardHandler.class)
 public class KeyboardHandlerMixin {
     @Shadow @Final private Minecraft minecraft;
@@ -21,6 +24,7 @@ public class KeyboardHandlerMixin {
     @Shadow private long debugCrashKeyReportedTime;
     @Shadow private long debugCrashKeyReportedCount;
 
+    //? if >=1.21.11 {
     @Inject(method = "handleDebugKeys", at = @At("HEAD"), cancellable = true)
     private void onDebugKey(KeyEvent keyEvent, CallbackInfoReturnable<Boolean> cir) {
         if (minecraft.player == null) return;
@@ -39,20 +43,63 @@ public class KeyboardHandlerMixin {
 
         cir.setReturnValue(true);
     }
+    //?}
+    //? if >=1.21.9 && <1.21.11 {
+    /*@Inject(method = "handleDebugKeys", at = @At("HEAD"), cancellable = true)
+    private void onDebugKey(KeyEvent keyEvent, CallbackInfoReturnable<Boolean> cir) {
+        if (minecraft.player == null) return;
+
+        if (keyEvent.input() != 67) return;
+        if (minecraft.player.isReducedDebugInfo()) return;
+
+        copyCoords();
+
+        debugCrashKeyTime = -1L;
+        debugCrashKeyReportedTime = -1L;
+        debugCrashKeyReportedCount = 0;
+
+        cir.setReturnValue(true);
+    }
+    *///?}
+    //? if <1.21.9 {
+    /*@Inject(method = "handleDebugKeys", at = @At("HEAD"), cancellable = true)
+    private void onDebugKey(int key, CallbackInfoReturnable<Boolean> cir) {
+        if (minecraft.player == null) return;
+
+        if (key != 67) return;
+        if (minecraft.player.isReducedDebugInfo()) return;
+
+        copyCoords();
+
+        debugCrashKeyTime = -1L;
+        debugCrashKeyReportedTime = -1L;
+        debugCrashKeyReportedCount = 0;
+
+        cir.setReturnValue(true);
+    }
+    *///?}
 
     private void copyCoords() {
         LocalPlayer player = minecraft.player;
         CopyMode mode = BetterF3CConfig.getInstance().getCopyMode();
+        //? if >=1.21.11 {
+        String dim = player.level().dimension().identifier().toString();
+        //?} else {
+        /*String dim = player.level().dimension().location().toString();
+        *///?}
         String coords = switch (mode) {
             case BASIC -> String.format("%.0f %.0f %.0f", player.getX(), player.getY(), player.getZ());
             case ADVANCED -> String.format("%.0f %.0f %.0f %.2f %.2f", player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             case TP_COMMAND -> String.format("/tp @s %.0f %.0f %.0f", player.getX(), player.getY(), player.getZ());
             case ULTIMATE -> {
-                String dim = player.level().dimension().identifier().toString();
                 yield String.format("/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f", dim, player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             }
         };
         minecraft.keyboardHandler.setClipboard(coords);
+        //? if >=26.1 {
         player.sendOverlayMessage(Component.literal("Copied: " + coords));
+        //?} else {
+        /*player.displayClientMessage(Component.literal("Copied: " + coords), true);
+        *///?}
     }
 }

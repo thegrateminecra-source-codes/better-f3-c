@@ -1,40 +1,31 @@
 # Better F3 C
 
-Replaces the default F3+C debug copy output with configurable coordinate formatting.
+Makes F3+C copy a useful coordinate string instead of the vanilla one.
 
-## Features
+Four modes, cycle through them in game:
 
-When you press F3+C (or your rebound key), instead of the default Minecraft debug copy, you get clean, configurable output:
+- Basic: `123 64 456`
+- Advanced: `123 64 456 -90.00 0.00`
+- TP Command: `/tp @s 123 64 456`
+- Ultimate: `/execute in minecraft:overworld run tp @s 123.00 64.00 456.00 -90.00 0.00`
 
-| Mode | Output Example |
-|------|---------------|
-| **Basic** | `123 64 456` |
-| **Advanced** | `123 64 456 -90.00 0.00` |
-| **TP Command** | `/tp @s 123 64 456` |
-| **Ultimate** | `/execute in minecraft:overworld run tp @s 123.00 64.00 456.00 -90.00 0.00` |
+## Setup
 
-## Configuration
+Jar into your mods folder, built for Fabric and Forge. If you have
+[Mod Menu](https://modrinth.com/mod/modmenu) (Fabric) there's a config button
+on this mod's entry; on Forge it shows up on the mod's entry in the vanilla
+mods list. No menu access? Edit `config/betterf3c.json` by hand instead —
+`copyMode` is one of BASIC, ADVANCED, TP_COMMAND, ULTIMATE.
 
-Double-click the mod in Mod Menu to open the config screen (requires [Mod Menu](https://modrinth.com/mod/modmenu)). Cycle through modes with the button — your selection is saved automatically to `config/betterf3c.json`.
+Keys:
 
-You can also edit `config/betterf3c.json` directly without Mod Menu installed.
+- F3+C copies in the mode you've picked
 
-## Installation
+Fabric builds land for every stable version from 1.21.1 up. Forge lands
+too, except 1.21.2 (Forge skipped it) and 26.1, whose forge build refuses
+to even boot.
+The jar only loads where it was built for, so pick the one matching your
+game - fabric jars are `betterf3c-<version>.jar`, forge jars are
+`betterf3c-forge-<version>.jar`.
 
-1. Install [Fabric Loader](https://fabricmc.net/) for a supported version
-2. Install [Fabric API](https://modrinth.com/mod/fabric-api)
-3. Drop the JAR into your `mods` folder
-
-### Optional
-
-- [Mod Menu](https://modrinth.com/mod/modmenu) — adds a config screen accessible from the mods list
-
-## Compatibility
-
-- **Minecraft**: 1.21 - 26.3
-- **Loader**:
-- **Mod Menu**:
-
-## License
-
-MIT
+MIT license.

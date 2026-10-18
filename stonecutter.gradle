@@ -1,0 +1,63 @@
+plugins {
+    id("dev.kikugie.stonecutter")
+}
+
+stonecutter.active("26.3-fabric")
+
+// loader constants for the //? if fabric / //? if forge switches
+stonecutter.parameters {
+    def loader = current.project.split('-', 2)[1]
+    constants.match loader, 'fabric', 'forge'
+}
+
+def everyBuild = subprojects.collect { it.path + ":build" }
+tasks.register("buildAll") {
+    group = "build"
+    description = "Builds the mod jar for every game version and loader, then shelves the jars"
+    dependsOn everyBuild, "collectJars"
+}
+
+tasks.register("collectJars") {
+    group = "build"
+    description = "Shelves built jars under versions/jars/<loader>/<name>.jar"
+    dependsOn everyBuild
+    // config cache hates grabbing gradle objects inside doLast
+    def jarsOut = rootProject.projectDir.toPath().resolve("versions/jars")
+    def jarDirs = [:].withDefault { [] }
+    subprojects.each { p ->
+        def libs = p.file("build/libs")
+        if (libs.isDirectory()) {
+            jarDirs[p.name.endsWith("-forge") ? "forge" : "fabric"] += libs
+        }
+    }
+    doLast {
+        ["fabric", "forge"].each { jarsOut.resolve(it).toFile().mkdirs() }
+        jarDirs.each { loader, libs ->
+            libs.each { dir ->
+                dir.listFiles().each {
+                    java.nio.file.Files.copy(it.toPath(), jarsOut.resolve(loader).resolve(it.name),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                }
+            }
+        }
+        println "jars shelved under versions/jars/fabric and versions/jars/forge"
+    }
+}
+
+import org.gradle.api.services.BuildService
+import org.gradle.api.services.BuildServiceParameters
+
+// FG recompiles mc per node, run those one at a time
+interface ForgePrepMutex extends BuildService<BuildServiceParameters.None> {}
+
+def mutex = gradle.sharedServices.registerIfAbsent("forgePrepMutex", ForgePrepMutex) {
+    it.maxParallelUsages.set(1)
+}
+
+def heavyTaskNames = ["createMcp2Srg", "extractSrg", "applyPatches", "setupLayers", "setupLayersWorkspace"]
+
+subprojects {
+    tasks.matching { t -> heavyTaskNames.any { it.equalsIgnoreCase(t.name) } }.configureEach {
+        usesService(mutex)
+    }
+}

@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[${fml},)"
+license="MIT"
+
+[[mods]]
+modId="betterf3c"
+version="${version}"
+displayName="Better F3 C"
+description="Replaces F3+C debug copy with configurable coordinate output"
+license="MIT"
+logoFile="logo.png"
+
+[[dependencies.betterf3c]]
+modId="forge"
+mandatory=true
+versionRange="[${fml},)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.betterf3c]]
+modId="minecraft"
+mandatory=true
+versionRange="${minecraft}"
+ordering="NONE"
+side="BOTH"
